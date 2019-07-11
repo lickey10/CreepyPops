@@ -1,6 +1,10 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Data;
+using System.IO;
+using UnityEngine.UI;
 
 /// <summary> ##################################
 /// 
@@ -115,7 +119,7 @@ public class JSFGameManager : MonoBehaviour {
 	public GameObject pieceManager;
 	[Tooltip("The reference for the PanelManager Object.")]
 	public GameObject panelManager;
-	[HideInInspector] public JSFPieceDefinition[] pieceTypes;
+    [HideInInspector] public JSFPieceDefinition[] pieceTypes;
 	[HideInInspector] public JSFPanelDefinition[] panelTypes;
 	
 	public JSFBoard[,] board; // the board array
@@ -144,12 +148,21 @@ public class JSFGameManager : MonoBehaviour {
 	// environment control variable
 	[HideInInspector] public JSFGameState gameState = JSFGameState.GameActive;
 
-	#region Easy Access Functions
-	// ================================================
-	// Easy Access FUNCTIONS
-	// ================================================
-	// an easy access function to call the board from an int-array
-	public JSFBoard iBoard(int[] arrayRef){
+    private string json = "";
+
+    /// <summary>
+    /// predefine columns here to there are no typos
+    /// </summary>
+    //private const string COL_PRIMARYKEY = "ID";  // Primary key is unique, and since this is for spelling words... they will work
+    //private const string COL_DESCRIPTION = "Description";
+    List<FlowerInfo> flowers;
+
+    #region Easy Access Functions
+    // ================================================
+    // Easy Access FUNCTIONS
+    // ================================================
+    // an easy access function to call the board from an int-array
+    public JSFBoard iBoard(int[] arrayRef){
 		return board[arrayRef[0],arrayRef[1]];
 	}
 	
@@ -395,14 +408,41 @@ public class JSFGameManager : MonoBehaviour {
 		}
 	}
 
-	#endregion Misc Functions
+    public void DisplayPieceDescription(JSFGamePiece gp)
+    {
+        //if(pieceDescriptionPanel && !pieceDescriptionPanel.activeSelf)
+        //{
+        //    string tempName = gp.thisPiece.name.Replace("(Clone)", "");
 
-	#region Routine Checks Related
-	// ##################################################
-	// Routine checks and it's related functions
-	// ##################################################
-	
-	// status update on given intervals
+        //    if (tempName.Contains(" "))
+        //        tempName = tempName.Substring(0, gp.thisPiece.name.IndexOf(" "));
+
+        //    //FlowerInfo flowerInfo = GetFlowerInfo(tempName);
+
+        //    //if (flowerInfo?.Name?.Trim().Length > 0)
+        //    //{
+        //    //    pieceDescriptionPanel.SetActive(true);
+
+        //    //    //set name
+        //    //    pieceDescriptionPanel.GetComponentsInChildren<TMPro.TextMeshProUGUI>().Where(x => x.name == "Name Text").FirstOrDefault().text = flowerInfo.Name;
+
+        //    //    //set description text
+        //    //    pieceDescriptionPanel.GetComponentsInChildren<TMPro.TextMeshProUGUI>().Where(x => x.name == "Description Text").FirstOrDefault().text = flowerInfo.Description;
+
+        //    //    //set image
+        //    //    pieceDescriptionPanel.GetComponentsInChildren<Image>().Where(x => x.name == "FlowerImage").FirstOrDefault().sprite = gp.thisPiece.GetComponent<SpriteRenderer>().sprite;
+        //    //}
+        //}
+    }
+
+    #endregion Misc Functions
+
+    #region Routine Checks Related
+    // ##################################################
+    // Routine checks and it's related functions
+    // ##################################################
+
+    // status update on given intervals
     IEnumerator updater () {
 		while (gameState != JSFGameState.GameOver){  // loop again (infinite) until game over
 			if(JSFSwipeManager.isSwiping && !Input.GetMouseButton(0)){
@@ -1177,7 +1217,13 @@ public class JSFGameManager : MonoBehaviour {
 
 		canMove = false; // initially cannot be moved...
 		gameState = JSFGameState.GamePending; // game is waiting to be started...
-	}
+
+        //if(json == "")
+        //    json = loadStreamingAsset("Flowers.json");
+
+        //if (flowers == null)
+        //    flowers = getFlowers("Alabama");
+    }
 
 	void Start(){
 		// init the board objects
@@ -1186,5 +1232,240 @@ public class JSFGameManager : MonoBehaviour {
 		}
 	}
 
-	#endregion Unity Functions
+    //private List<FlowerInfo> getFlowers(string state)
+    //{
+    //    flowers = new List<FlowerInfo>();
+    //    FlowerInfo flower = new FlowerInfo();
+
+    //    foreach (string flowerLine in Alabama.Json.Split('\n').ToList())
+    //    {
+    //        if (flowerLine.Contains("\"Description\": \""))
+    //            flower.Description = flowerLine.Replace("\"Description\": \"", "").Replace("\",","").Trim();
+
+    //        if (flowerLine.Contains("\"ID\": "))
+    //            flower.ID = int.Parse(flowerLine.Replace("\"ID\": ", "").Replace(",", "").Trim());
+
+    //        if (flowerLine.Contains("\"IsStateFlower\": "))
+    //        {
+    //            if (flowerLine.Replace("\"IsStateFlower\": ", "").Replace(",", "").Trim() == "1")
+    //                flower.IsStateFlower = true;
+    //            else
+    //                flower.IsStateFlower = false;
+    //        }
+
+    //        if (flowerLine.Contains("\"Name\": \""))
+    //            flower.Name = flowerLine.Replace("\"Name\": \"", "").Replace("\",", "").Trim();
+
+    //        if (flowerLine.Contains("\"PrefabPrefix\": \""))
+    //            flower.PrefabPrefix = flowerLine.Replace("\"PrefabPrefix\": \"", "").Replace("\",", "").Trim();
+
+    //        if (flowerLine.Contains("\"SourceOfData\": \""))
+    //            flower.SourceOfData = flowerLine.Replace("\"SourceOfData\": \"", "").Replace("\",", "").Trim();
+
+    //        if (flowerLine.Contains("\"State\": \""))
+    //            flower.State = flowerLine.Replace("\"State\": \"", "").Replace("\"", "").Trim();
+
+    //        if (flowerLine.Contains("},"))//End of this flower
+    //        {
+    //            flowers.Add(flower);
+
+    //            flower = new FlowerInfo();
+    //        }
+    //    }
+
+    //    //add the last flower in the list
+    //    flowers.Add(flower);
+
+    //    return flowers;
+    //}
+
+    //IEnumerator loadStreamingAsset(string fileName)
+    IEnumerator loadStreamingAsset(string fileName)
+    {
+        string filePath = System.IO.Path.Combine(Application.streamingAssetsPath, fileName);
+
+        string result;
+        if (filePath.Contains("://") || filePath.Contains(":///"))
+        {
+            WWW www = new WWW(filePath);
+            yield return www;
+            result = www.text;
+        }
+        else
+            result = System.IO.File.ReadAllText(filePath);
+
+        //return result;
+    }
+
+    IEnumerator loadStreamingAssetArray(string fileName)
+    {
+        string filePath = System.IO.Path.Combine(Application.streamingAssetsPath, fileName);
+
+        string[] result = null;
+        if (filePath.Contains("://") || filePath.Contains(":///"))
+        {
+            WWW www = new WWW(filePath);
+            yield return www;
+            result = new string[] { www.text };
+        }
+        else
+            result = System.IO.File.ReadAllLines(filePath);
+        
+        //return result;
+    }
+
+    //public FlowerInfo GetFlowerInfo(string PrefabPrefix)
+    //{
+    //    //FlowerInfo flowerInfo = new FlowerInfo();
+
+    //    //List<string> flowers = json.Split(new string[] { "},{" }, System.StringSplitOptions.RemoveEmptyEntries).ToList();
+
+    //    FlowerInfo flowerInfo = flowers.Where(x => x.PrefabPrefix == PrefabPrefix).FirstOrDefault();
+
+    //    //JObject rss = JObject.Parse(json);
+
+    //    //JArray flowers = (JArray)rss[0];
+
+    //    //JToken thisFlower = flowers.Where(x => x.Value<string>("State") == State).FirstOrDefault();
+
+    //    //flowerInfo.Name = (string)thisFlower["Name"];
+    //    //flowerInfo.Description = (string)thisFlower["Description"];
+    //    //flowerInfo.PrefabPrefix = PrefabPrefix;
+         
+    //    //var flowerInfoRecord =
+    //    //    from p in rss["channel"]["item"]
+    //    //    select (string)p["title"];
+
+    //    //_connection.Open();
+
+    //    //_command.CommandText = "SELECT * FROM "+ SQL_TABLE_NAME +" WHERE State = '"+ State +"' AND PrefabPrefix = '"+ PrefabPrefix +"'";
+
+    //    //_reader = _command.ExecuteReader();
+    //    //while (_reader.Read())
+    //    //{
+    //    //    flowerInfo.Name = _reader.GetString(1);
+    //    //    flowerInfo.Description = _reader.GetString(2);
+    //    //    flowerInfo.PrefabPrefix = _reader.GetString(5);
+
+    //    //    // reuse same stringbuilder
+    //    //    //sb.Length = 0;
+    //    //    //sb.Append(_reader.GetString(0)).Append(" ");
+    //    //    //sb.Append(_reader.GetString(1)).Append(" ");
+    //    //    //sb.AppendLine();
+
+    //    //    // view our output
+    //    //    //if (DebugMode)
+    //    //    //    Debug.Log(sb.ToString());
+    //    //}
+    //    //_reader.Close();
+    //    //_connection.Close();
+
+    //    return flowerInfo;
+    //}
+
+    /// <summary>
+    /// Clean up SQLite Connections, anything else
+    /// </summary>
+    void OnDestroy()
+    {
+        //SQLiteClose();
+    }
+
+    /// <summary>
+    /// Basic initialization of SQLite
+    /// </summary>
+    //private void SQLiteInit()
+    //{
+    //    try
+    //    {
+    //        Debug.Log("SQLiter - Opening SQLite Connection at " + _sqlDBLocation);
+    //        _connection = new SqliteConnection(_sqlDBLocation);
+    //        _command = _connection.CreateCommand();
+    //        _connection.Open();
+
+    //        // WAL = write ahead logging, very huge speed increase
+    //        _command.CommandText = "PRAGMA journal_mode = WAL;";
+    //        _command.ExecuteNonQuery();
+
+    //        // journal mode = look it up on google, I don't remember
+    //        _command.CommandText = "PRAGMA journal_mode";
+    //        _reader = _command.ExecuteReader();
+    //        //if (DebugMode && _reader.Read())
+    //        //    Debug.Log("SQLiter - WAL value is: " + _reader.GetString(0));
+    //        _reader.Close();
+
+    //        // more speed increases
+    //        _command.CommandText = "PRAGMA synchronous = OFF";
+    //        _command.ExecuteNonQuery();
+
+    //        // and some more
+    //        _command.CommandText = "PRAGMA synchronous";
+    //        _reader = _command.ExecuteReader();
+    //        //if (DebugMode && _reader.Read())
+    //        //    Debug.Log("SQLiter - synchronous value is: " + _reader.GetInt32(0));
+    //        _reader.Close();
+
+    //        // here we check if the table you want to use exists or not.  If it doesn't exist we create it.
+    //        _command.CommandText = "SELECT name FROM sqlite_master WHERE name='" + SQL_TABLE_NAME + "'";
+    //        _reader = _command.ExecuteReader();
+    //        if (!_reader.Read())
+    //        {
+    //            Debug.Log("SQLiter - Could not find SQLite table " + SQL_TABLE_NAME);
+    //            _createNewTable = true;
+    //        }
+    //        _reader.Close();
+
+    //        // create new table if it wasn't found
+    //        if (_createNewTable)
+    //        {
+    //            Debug.Log("SQLiter - Dropping old SQLite table if Exists: " + SQL_TABLE_NAME);
+
+    //            // insurance policy, drop table
+    //            _command.CommandText = "DROP TABLE IF EXISTS " + SQL_TABLE_NAME;
+    //            _command.ExecuteNonQuery();
+
+    //            Debug.Log("SQLiter - Creating new SQLite table: " + SQL_TABLE_NAME);
+
+    //            // create new - SQLite recommendation is to drop table, not clear it
+    //            _sqlString = "CREATE TABLE IF NOT EXISTS " + SQL_TABLE_NAME + " (" +
+    //                COL_PRIMARYKEY + " INTEGER UNIQUE, " +
+    //                COL_DESCRIPTION + " TEXT)";
+    //            _command.CommandText = _sqlString;
+    //            _command.ExecuteNonQuery();
+    //        }
+    //        else
+    //        {
+    //            //if (DebugMode)
+    //            //    Debug.Log("SQLiter - SQLite table " + SQL_TABLE_NAME + " was found");
+    //        }
+
+    //        // close connection
+    //        _connection.Close();
+    //    }
+    //    catch (System.Exception ex)
+    //    {
+
+    //        throw;
+    //    }
+    //}
+
+    /// <summary>
+    /// Clean up everything for SQLite
+    /// </summary>
+    //private void SQLiteClose()
+    //{
+    //    if (_reader != null && !_reader.IsClosed)
+    //        _reader.Close();
+    //    _reader = null;
+
+    //    if (_command != null)
+    //        _command.Dispose();
+    //    _command = null;
+
+    //    if (_connection != null && _connection.State != ConnectionState.Closed)
+    //        _connection.Close();
+    //    _connection = null;
+    //}
+
+    #endregion Unity Functions
 }

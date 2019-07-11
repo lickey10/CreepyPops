@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System;
 
 /*
  * JSFPieceDefinition main class
@@ -28,8 +30,11 @@ public abstract class JSFPieceDefinition : MonoBehaviour {
 	public GameObject[] skinSquare; // how the piece will look like for square mode
 	public GameObject[] skinHex; // how the piece will look like for hex mode
 	[HideInInspector] public JSFGameManager gm {get{return JSFUtils.gm;}} // easy reference call
+    private WaitForSeconds doubleClickTreashHold = new WaitForSeconds(.5f);
+    private int clickCount = 0;
+    private JSFGamePiece currentlyClickedGP = null;
 
-	public GameObject[] skin{get { // skin variable for game engine to call
+    public GameObject[] skin{get { // skin variable for game engine to call
 			switch(skinListToUse){
 			case SkinList.Auto : default:
 				switch(gm.boardType){
@@ -44,14 +49,14 @@ public abstract class JSFPieceDefinition : MonoBehaviour {
 				return skinHex;
 			} } }
 
-	//
-	//  Virtual functions that users can override
-	//  or leave it as default behaviours
-	//
+    //
+    //  Virtual functions that users can override
+    //  or leave it as default behaviours
+    //
 
-	// called by Board during GameManager game-start phase
-	// different from Start() as that is unity start, not neccessarily the game is set-up yet
-	public virtual void onGameStart(JSFBoard board){
+    // called by Board during GameManager game-start phase
+    // different from Start() as that is unity start, not neccessarily the game is set-up yet
+    public virtual void onGameStart(JSFBoard board){
 		// do nothing....
 	}
 
@@ -67,8 +72,8 @@ public abstract class JSFPieceDefinition : MonoBehaviour {
 
 	// called by JSFRelay during onPieceClicked
 	public virtual void onPieceClicked(JSFGamePiece gp){
-		// do nothing...
-	}
+        OnPointerClick(gp);
+    }
 
 	// called by GameManager when player makes the next move
 	public virtual void onPlayerMove(JSFBoard board) {
@@ -259,6 +264,41 @@ public abstract class JSFPieceDefinition : MonoBehaviour {
 		 * 
 		 */
 	}
+
+    private void OnPointerClick(JSFGamePiece gp)
+    {
+        if (currentlyClickedGP == gp)
+            clickCount++;
+        else
+        {
+            clickCount = 1;
+
+            currentlyClickedGP = gp;
+        }
+
+        if (clickCount == 2)//double click
+        {
+            //display description and gameobject
+            //var description = descriptions[Array.FindIndex(gp.pd.skin, x => x.name == gp.thisPiece.name.Replace("(Clone)",""))];
+            gm.DisplayPieceDescription(gp);
+
+            clickCount = 0;
+            currentlyClickedGP = null;
+        }
+        else
+        {
+            StartCoroutine(TickDown());
+        }
+    }
+
+    private IEnumerator TickDown()
+    {
+        yield return doubleClickTreashHold;
+        if (clickCount > 0)
+        {
+            clickCount--;
+        }
+    }
 }
 
 
