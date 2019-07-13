@@ -255,8 +255,28 @@ public class JSFBoardLayout : MonoBehaviour {
 		
 		for(int x = 0; x < gm.boardWidth; x++){
 			for(int y = 0; y < gm.boardHeight; y++){
-				panelArray[count] = generateNumber(); // generate and assigns a random number
-				setDefaultStrength(count);
+                //if (panelScripts[count].excludeIfRandom)
+                int generatedNumber = -1;
+                int retryCounter = 0;
+
+                while (generatedNumber < 0 || retryCounter < panelScripts.Length)
+                {
+                    generatedNumber = generateNumber();
+
+                    if (!panelScripts[generatedNumber].excludeIfRandom)
+                    {
+                        //panelArray[count] = panelScripts[generatedNumber].panelToUseDuringSpawn(x, y);//use weights to determine which panel to show
+                        panelArray[count] = generatedNumber;
+                    }
+                    else
+                        generatedNumber = -1;
+
+                    retryCounter++;
+                }
+                //else
+                //    panelArray[count] = generateNumber(); // generate and assigns a random number
+
+                setDefaultStrength(count);
 				count++;
 			}
 		}

@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 /*
  * JSFPanelDefinition main class
@@ -19,6 +20,7 @@ public abstract class JSFPanelDefinition : MonoBehaviour {
 	public bool hasDefaultPanel = true;
 	public bool hasNoSkin = false;
 	public int defaultStrength = 0;
+    public bool excludeIfRandom = false;
 	public SkinList skinListToUse = SkinList.SquareList;
 	[HideInInspector] public JSFGameManager gm {get{return JSFUtils.gm;}} // easy reference call
 	public GameObject[] skinSquare; // how the panel will look like in square mode
@@ -37,15 +39,54 @@ public abstract class JSFPanelDefinition : MonoBehaviour {
 			case SkinList.HexList :
 				return skinHex;
 			} } }
+    public bool weightedSpawn = false;
+    [Range(0, 100)]
+    public List<int> weights = new List<int>(9);
+    int totalWeight = 0; // variable to hold the total weights
+    int selected = 0; // a variable to store the selected random range for weights
+    int addedWeight = 0; // a variable to store the cumulative added weight for calculations
 
+    void Start()
+    {
+        // run once weighted calculation...
+        totalWeight = 0; // reset the value first...
+        for (int z = 0; z < gm.NumOfActiveType; z++)
+        { // adds all available skin based on active type
+            if (z < weights.Count)
+            { // ensure we have allocated weights and add to the list
+                totalWeight += weights[z];
+            }
+        }
+    }
 
-	#region virtuals
-	// ===============================
-	// virtual functions - scripters can modify as they see fit or choose to use the defaults :)
-	// ===============================
+    public bool chanceToSpawnThis(int x, int y)
+    {
+        if (weightedSpawn) return true; // if enabled, use assigned weights
+        return false; // else, random behaviour
+    }
 
-	// for external scripts to call, will indicate that the panel got hit
-	public virtual bool gotHit(JSFBoardPanel bp){
+    public int panelToUseDuringSpawn(int x, int y)
+    {
+        selected = Random.Range(1, totalWeight + 1); // the selected weight by random
+        addedWeight = 0; // resets the value first...
+        for (int z = 0; z < weights.Count; z++)
+        {
+            addedWeight += weights[z];
+            if (!excludeIfRandom && weights[z] > 0 && addedWeight > selected)
+            {
+                return z; // found the skin we want to use based on the selected weight
+            }
+        }
+        return 0; // failsafe ...
+    }
+
+    #region virtuals
+    // ===============================
+    // virtual functions - scripters can modify as they see fit or choose to use the defaults :)
+    // ===============================
+
+    // for external scripts to call, will indicate that the panel got hit
+    public virtual bool gotHit(JSFBoardPanel bp){
 		playAudioVisuals(bp); // play audio visual for selected panels
 		bp.durability--;
 		return true;
@@ -89,15 +130,22 @@ public abstract class JSFPanelDefinition : MonoBehaviour {
 		// do nothing...
 		return false; // default behaviour
 	}
-	#endregion virtuals
 
-	#region abstracts
-	// ===============================
-	// abstract functions - must be present and defined in each child script
-	// ===============================
-	
-	// function to check if pieces can fall into this board box
-	public abstract bool allowsGravity(JSFBoardPanel bp);
+    // when spawning a new piece by gravity, chance to spawn a type defined...
+    //public virtual JSFPanelDefinition chanceToSpawnThis(int x, int y)
+    //{
+    //    // ** x / y is the board position being called for spawning...
+    //    return null; // default does nothing... will create a normal piece instead
+    //}
+    #endregion virtuals
+
+    #region abstracts
+    // ===============================
+    // abstract functions - must be present and defined in each child script
+    // ===============================
+
+    // function to check if pieces can fall into this board box
+    public abstract bool allowsGravity(JSFBoardPanel bp);
 
 	// function to check if pieces can re-appear on this board box
 	public abstract bool allowsAppearReplacement(JSFBoardPanel bp);

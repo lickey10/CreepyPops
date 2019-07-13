@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
 /// <summary> ##################################
 /// 
@@ -45,6 +46,9 @@ public class JSFAudioPlayer : MonoBehaviour {
 	public customAudio[] comboMidFx;
 	public customAudio[] comboHighFx;
 
+    public Slider MusicVolumeSlider;
+    public Slider FXVolumeSlider;
+
     // created a custom class to store a bool as a reference,
     // and to simulate a cooldown function with "x" seconds.
     [System.Serializable]
@@ -82,7 +86,10 @@ public class JSFAudioPlayer : MonoBehaviour {
 		while(true){
 			if(enableMusic && !bgmPlayer.GetComponent<AudioSource>().isPlaying){
 				loadBGM();
-			}
+
+                MusicVolumeSlider.value = PlayerPrefs.GetFloat("MusicVolume", 1);
+                FXVolumeSlider.value = PlayerPrefs.GetFloat("FXVolume", 1);
+            }
 			yield return new WaitForSeconds(2f);
 		}
 	}
@@ -107,7 +114,7 @@ public class JSFAudioPlayer : MonoBehaviour {
 		enableSoundFX = !enableSoundFX;
 
         PlayerPrefs.SetString("enableSoundFX", enableSoundFX.ToString());
-	}
+    }
 
     public void PlayMatchSound(int numberOfSounds)
     {
@@ -143,4 +150,18 @@ public class JSFAudioPlayer : MonoBehaviour {
         
         StartCoroutine(playNextBGM() );
 	}
+
+    public void OnFXValueChanged()
+    {
+        player.volume = FXVolumeSlider.value;
+
+        PlayerPrefs.SetFloat("FXVolumeSlider", FXVolumeSlider.value);
+    }
+
+    public void OnMusicValueChanged()
+    {
+        bgmPlayer.volume = MusicVolumeSlider.value;
+
+        PlayerPrefs.SetFloat("MusicVolume", MusicVolumeSlider.value);
+    }
 }
