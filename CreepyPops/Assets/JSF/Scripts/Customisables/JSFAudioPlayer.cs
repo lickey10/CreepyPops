@@ -155,7 +155,7 @@ public class JSFAudioPlayer : MonoBehaviour {
     {
         player.volume = FXVolumeSlider.value;
 
-        PlayerPrefs.SetFloat("FXVolumeSlider", FXVolumeSlider.value);
+        PlayerPrefs.SetFloat("FXVolume", FXVolumeSlider.value);
     }
 
     public void OnMusicValueChanged()
