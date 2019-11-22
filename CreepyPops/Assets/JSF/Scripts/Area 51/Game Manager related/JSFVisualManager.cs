@@ -32,7 +32,7 @@ public class JSFVisualManager : MonoBehaviour {
         highScoreString = PlayerPrefs.GetString("HighScore", "|");
         long.TryParse(highScoreString.Split('|')[0], out highScore);
         int.TryParse(highScoreString.Split('|')[1], out moves);
-        highScoreTxtObject.text = "High Score: " + highScore.ToString() + " / " + moves.ToString();
+        highScoreTxtObject.text = highScore.ToString() + " / " + moves.ToString();
     }
 
 	void SyncReferences(){
@@ -51,7 +51,7 @@ public class JSFVisualManager : MonoBehaviour {
 	// to output the score to the text label
 	void txtUpdate(){
 		if(scoreTxtObject != null){
-			scoreTxtObject.text = "Score: "+ gm.score.ToString();
+			scoreTxtObject.text = gm.score.ToString();
 
             if (highScoreTxtObject != null)
             {
@@ -60,7 +60,7 @@ public class JSFVisualManager : MonoBehaviour {
                     highScore = gm.score;
                     moves = gm.moves;  
 
-                    highScoreTxtObject.text = "High Score: "+ highScore.ToString() +" / "+ moves.ToString();
+                    highScoreTxtObject.text = highScore.ToString() +" / "+ moves.ToString();
 
                     PlayerPrefs.SetString("HighScore",highScore.ToString() +"|"+ moves.ToString());
                     PlayerPrefs.Save();
@@ -69,7 +69,7 @@ public class JSFVisualManager : MonoBehaviour {
         }
         
         if (movesTxtObject != null){
-			movesTxtObject.text = "Moves: "+ gm.moves.ToString();
+			movesTxtObject.text = gm.moves.ToString();
 		}
 	}
 
