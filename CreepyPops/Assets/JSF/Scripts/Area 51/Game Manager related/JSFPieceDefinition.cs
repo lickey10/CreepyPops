@@ -23,6 +23,7 @@ public abstract class JSFPieceDefinition : MonoBehaviour {
 	public bool allowGravity = true;
 	public bool landslideEffect = false;
 	public bool ignoreReset = false;
+    public bool displayDescriptions = false;
 	public int scorePerPiece = 0;
 	public SkinList skinListToUse = SkinList.SquareList;
 
@@ -280,7 +281,9 @@ public abstract class JSFPieceDefinition : MonoBehaviour {
         {
             //display description and gameobject
             //var description = descriptions[Array.FindIndex(gp.pd.skin, x => x.name == gp.thisPiece.name.Replace("(Clone)",""))];
-            gm.DisplayPieceDescription(gp);
+
+            if(displayDescriptions)
+                gm.DisplayPieceDescription(gp);
 
             clickCount = 0;
             currentlyClickedGP = null;
